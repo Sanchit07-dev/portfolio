@@ -120,7 +120,7 @@ export function WorldEnvironment() {
       <ProjectCastle position={[55, 0, -52]} />
       <CommunicationTower position={[0, 0, -85]} />
       <Windmill position={[68, 0, 42]} />
-      {/* Well shifted to [0, 0, -6] so spawn point [0, 0, 0] is completely open */}
+      {/* Stone Well in village */}
       <VillageWell position={[0, 0, -6]} />
       <MarketStall position={[-10, 0, -7]} rotation={Math.PI / 4} stripeColor="#F97316" />
       <MarketStall position={[10, 0, -7]} rotation={-Math.PI / 4} stripeColor="#0284C7" />
@@ -138,8 +138,8 @@ export function WorldEnvironment() {
         />
       ))}
 
-      {/* ── 7. LOCATION BEACONS ── */}
-      {WORLD_LOCATIONS.map((loc) => (
+      {/* ── 7. LOCATION BEACONS (Rendered cleanly only on target quest destinations) ── */}
+      {WORLD_LOCATIONS.filter((loc) => loc.showBeacon).map((loc) => (
         <WorldBeacon
           key={`beacon-${loc.id}`}
           position={loc.coordinates}

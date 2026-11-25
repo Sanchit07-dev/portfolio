@@ -9,6 +9,17 @@ export const WORLD_BOUNDS = {
   waterRadius: 240,
 };
 
+// Player physical dimensions and pivot configuration
+export const PLAYER_PHYSICS = {
+  footOffset: 0.75,       // Height of hip joint from ground so shoe bottoms sit precisely at y = 0
+  colliderRadius: 0.45,   // Horizontal collision radius
+  walkSpeed: 7.0,
+  sprintSpeed: 12.0,
+  jumpStrength: 8.8,
+  gravity: 24.0,
+  stepInterval: 0.32,
+};
+
 // Distinct thematic zones across the larger realm
 export const WORLD_ZONES = [
   { id: 'village', name: 'Village Square', center: [0, 0, 0], radius: 28, color: '#F97316' },
@@ -172,7 +183,7 @@ export const WORLD_STRUCTURES = [
     rotation: -Math.PI / 4,
     title: 'Farmland Windmill'
   },
-  // 7. Stone Well in Village Center - shifted slightly to [0, 0, -6] so spawn point [0, 0, 0] is completely open
+  // 7. Stone Well in Village Center - shifted north to [0, 0, -6] so spawn point [0, 0, 2] is completely open
   {
     id: 'village_well',
     type: 'well',

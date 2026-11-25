@@ -40,7 +40,8 @@ export const DEVELOPER_PROFILE = {
   ]
 };
 
-// RPG Locations with updated 3D world coordinates across expanded map
+// RPG Destination Locations
+// Note: 'spawn' is the starting hub; the 5 interactive destinations have active pillars & beacons
 export const WORLD_LOCATIONS = [
   {
     id: 'spawn',
@@ -48,6 +49,7 @@ export const WORLD_LOCATIONS = [
     category: 'Introduction',
     coordinates: [0, 0, 0],
     color: '#3B82F6',
+    showBeacon: false, // Don't render a vertical beam or curved ground torus directly under the village spawn plaza
     description: 'The starting plaza of Developer Quest. Where all journeys begin.',
     npcName: 'Guide Kenneth',
     npcTitle: 'Village Elder & Guide',
@@ -63,6 +65,7 @@ export const WORLD_LOCATIONS = [
     category: 'About Me',
     coordinates: [-35, 0, -22],
     color: '#10B981',
+    showBeacon: true,
     description: 'A cozy cottage with open doors housing Sanchit\'s personal workshop, desk, and background.',
     npcName: 'Sanchit Baviskar',
     npcTitle: 'Full-Stack Developer',
@@ -78,11 +81,12 @@ export const WORLD_LOCATIONS = [
     category: 'Technical Skills',
     coordinates: [-55, 0, 24],
     color: '#8B5CF6',
+    showBeacon: true,
     description: 'An ancient stone training dojo displaying verified technical abilities and weapon proficiencies.',
     npcName: 'Master Syntax',
     npcTitle: 'Training Master',
     dialogue: [
-      "Welcome warrior! Here we hone languages, frontend arts, backend spells, and relational database schemas.",
+      "Welcome warrior! Here we hone languages, frontend react architectures, backend spells, and relational database schemas.",
       "Only battle-tested technologies are forged into these stones. Inspect the pillars to view Sanchit's technical arsenal!"
     ]
   },
@@ -92,6 +96,7 @@ export const WORLD_LOCATIONS = [
     category: 'Featured Projects',
     coordinates: [55, 0, -52],
     color: '#F97316',
+    showBeacon: true,
     description: 'A grand stone citadel safeguarding Sanchit\'s verified software projects and applications.',
     npcName: 'Archivist Thorne',
     npcTitle: 'Castle Curator',
@@ -106,6 +111,7 @@ export const WORLD_LOCATIONS = [
     category: 'Milestones & Services',
     coordinates: [62, 0, 48],
     color: '#EC4899',
+    showBeacon: true,
     description: 'A majestic highland summit showcasing milestones, freelance capabilities, and client services.',
     npcName: 'Priestess Althea',
     npcTitle: 'Keeper of Records',
@@ -120,6 +126,7 @@ export const WORLD_LOCATIONS = [
     category: 'Contact & Hire',
     coordinates: [0, 0, -85],
     color: '#06B6D4',
+    showBeacon: true,
     description: 'A towering beacon of signal crystals connecting this realm directly to Sanchit\'s inbox.',
     npcName: 'Beacon Operator Lyra',
     npcTitle: 'Communications Officer',
