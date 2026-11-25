@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────
 
 export const WORLD_BOUNDS = {
-  radius: 115, // Island radius (expands area from ~8,000 m² to ~41,500 m²)
+  radius: 115, // Island radius
   waterRadius: 240,
 };
 
@@ -26,7 +26,7 @@ export const WORLD_NPCS = [
     name: 'Guide Kenneth',
     title: 'Village Elder',
     locationId: 'spawn',
-    position: [3, 0, 3],
+    position: [4, 0, 4],
     roleColor: '#3B82F6',
     dialogue: [
       "Welcome, Adventurer! You've arrived in Developer Quest.",
@@ -172,11 +172,11 @@ export const WORLD_STRUCTURES = [
     rotation: -Math.PI / 4,
     title: 'Farmland Windmill'
   },
-  // 7. Stone Well in Village Center
+  // 7. Stone Well in Village Center - shifted slightly to [0, 0, -6] so spawn point [0, 0, 0] is completely open
   {
     id: 'village_well',
     type: 'well',
-    position: [0, 0, 0],
+    position: [0, 0, -6],
     rotation: 0
   },
   // 8. Village Market Stalls
@@ -210,11 +210,10 @@ export const WORLD_STRUCTURES = [
 
 // Static colliders: cylinder [x, z, radius] and AABB box [x, z, halfWidth, halfDepth]
 export const STATIC_COLLIDERS = [
-  // Village Well
-  { type: 'circle', x: 0, z: 0, r: 2.2 },
+  // Village Well placed at [0, 0, -6]
+  { type: 'circle', x: 0, z: -6, r: 1.8 },
 
-  // Enterable House Wall Colliders (leaving door open at x: -35, z: -17.5 to -19.5)
-  // House dimensions: width 10 (x: -40 to -30), depth 8 (z: -26 to -18)
+  // Enterable House Wall Colliders (leaving doorway open at x: -35, z: -18)
   // Back wall (z = -26)
   { type: 'box', x: -35, z: -26, hw: 5.2, hd: 0.5 },
   // Left wall (x = -40)
@@ -225,19 +224,16 @@ export const STATIC_COLLIDERS = [
   { type: 'box', x: -38.5, z: -18, hw: 1.8, hd: 0.5 },
   // Front wall Right section (x: -33.5 to -30)
   { type: 'box', x: -31.5, z: -18, hw: 1.8, hd: 0.5 },
-  // Doorway is clear between x: -36.7 and -33.3 at z: -18
 
   // Town Hall
   { type: 'box', x: 0, z: 18, hw: 6.5, hd: 5.0 },
 
   // Market Stalls
-  { type: 'circle', x: -10, z: -7, r: 2.2 },
-  { type: 'circle', x: 10, z: -7, r: 2.2 },
+  { type: 'circle', x: -10, z: -7, r: 2.0 },
+  { type: 'circle', x: 10, z: -7, r: 2.0 },
 
-  // Project Castle keep and towers
-  { type: 'circle', x: 55, z: -52, r: 10.5 },
-  { type: 'circle', x: 44, z: -54, r: 3.5 },
-  { type: 'circle', x: 66, z: -54, r: 3.5 },
+  // Project Castle
+  { type: 'circle', x: 55, z: -52, r: 10.0 },
 
   // Skill Grounds arena perimeter
   { type: 'circle', x: -55, z: 24, r: 8.5 },
@@ -270,7 +266,7 @@ export function generateVegetationAndRocks(count = 220, seed = 42) {
 
   for (let i = 0; i < count; i++) {
     const angle = rng() * Math.PI * 2;
-    const dist = 12 + rng() * 95; // inside island bounds
+    const dist = 14 + rng() * 95; // clear of spawn plaza
     const x = Math.cos(angle) * dist;
     const z = Math.sin(angle) * dist;
 
@@ -284,7 +280,7 @@ export function generateVegetationAndRocks(count = 220, seed = 42) {
     const distTownHall = Math.hypot(x - 0, z - 18);
 
     if (
-      distCenter > 14 &&
+      distCenter > 16 &&
       distHouse > 9 &&
       distCastle > 14 &&
       distSkills > 11 &&
@@ -293,17 +289,14 @@ export function generateVegetationAndRocks(count = 220, seed = 42) {
       distTownHall > 9
     ) {
       if (i % 3 === 0) {
-        // Pine tree
         const scale = 0.85 + rng() * 0.6;
         trees.push({ type: 'pine', pos: [x, 0, z], scale, rot: rng() * Math.PI });
         dynamicColliders.push({ type: 'circle', x, z, r: 0.65 * scale });
       } else if (i % 3 === 1) {
-        // Round oak tree
         const scale = 0.8 + rng() * 0.5;
         trees.push({ type: 'oak', pos: [x, 0, z], scale, rot: rng() * Math.PI });
         dynamicColliders.push({ type: 'circle', x, z, r: 0.7 * scale });
       } else {
-        // Rock boulder
         const scale = 0.7 + rng() * 0.7;
         rocks.push({
           pos: [x, 0.3 * scale, z],

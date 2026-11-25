@@ -23,8 +23,8 @@ export function Player() {
 
   const { camera } = useThree();
 
-  // Internal physics & movement state
-  const pos = useRef(new THREE.Vector3(0, 0, 0));
+  // Internal physics & movement state - spawn safely at [0, 0, 3] on the open stone plaza
+  const pos = useRef(new THREE.Vector3(0, 0, 3));
   const velocity = useRef(new THREE.Vector3(0, 0, 0));
   const rotation = useRef(0);
   const isGrounded = useRef(true);
@@ -40,6 +40,7 @@ export function Player() {
   const collectItem = useGameStore((state) => state.collectItem);
   const collectibles = useGameStore((state) => state.collectibles);
   const isPaused = useGameStore((state) => state.isPaused);
+  const activeModal = useGameStore((state) => state.activeModal);
 
   // Mouse drag camera orbit listener
   useEffect(() => {
@@ -93,8 +94,8 @@ export function Player() {
     };
   }, []);
 
-  // Collision detection helper: checks if a point (x, z) with player radius collides with an obstacle
-  const checkCollisionAt = (px, pz, playerRadius = 0.45) => {
+  // Collision detection helper: checks if a point (x, z) collides with an obstacle
+  const checkCollisionAt = (px, pz, playerRadius = 0.4) => {
     // 1. World perimeter boundary
     if (Math.hypot(px, pz) > WORLD_BOUNDS.radius - 2) {
       return true;
@@ -108,7 +109,6 @@ export function Player() {
           return true;
         }
       } else if (col.type === 'box') {
-        // AABB Box collision
         const minX = col.x - col.hw - playerRadius;
         const maxX = col.x + col.hw + playerRadius;
         const minZ = col.z - col.hd - playerRadius;
@@ -122,7 +122,8 @@ export function Player() {
   };
 
   useFrame((state, delta) => {
-    if (isPaused) return;
+    // Movement is disabled only when a modal dialogue is explicitly open
+    if (activeModal) return;
 
     // Movement calculation
     const moveSpeed = controls.sprint ? 12 : 7.0;
@@ -193,7 +194,7 @@ export function Player() {
     const targetX = pos.current.x + velocity.current.x * delta;
     const targetZ = pos.current.z + velocity.current.z * delta;
 
-    // Check full diagonal move
+    // Check full move
     if (!checkCollisionAt(targetX, targetZ)) {
       pos.current.x = targetX;
       pos.current.z = targetZ;
@@ -257,7 +258,7 @@ export function Player() {
     }
     setCurrentLocation(closestLoc);
 
-    // ── AUDIT ALL NPCS & STRUCTURE INTERACTION (FIXES BEACON OPERATOR LYRA) ──
+    // ── AUDIT ALL NPCS & STRUCTURE INTERACTION ──
     let foundInteractable = null;
 
     // 1. Check proximity to every NPC directly (interaction radius = 4.2m)
@@ -316,7 +317,7 @@ export function Player() {
   });
 
   return (
-    <group ref={playerGroup} position={[0, 0, 0]}>
+    <group ref={playerGroup} position={[0, 0, 3]}>
       {/* Head */}
       <mesh position={[0, 1.65, 0]} castShadow>
         <boxGeometry args={[0.42, 0.45, 0.42]} />
@@ -360,6 +361,7 @@ export function Player() {
           <boxGeometry args={[0.18, 0.65, 0.2]} />
           <meshStandardMaterial color="#EA580C" flatShading />
         </mesh>
+        {/* Hand */}
         <mesh position={[0, -0.68, 0]}>
           <boxGeometry args={[0.14, 0.14, 0.16]} />
           <meshStandardMaterial color="#FCD34D" flatShading />
@@ -372,6 +374,7 @@ export function Player() {
           <boxGeometry args={[0.18, 0.65, 0.2]} />
           <meshStandardMaterial color="#EA580C" flatShading />
         </mesh>
+        {/* Hand */}
         <mesh position={[0, -0.68, 0]}>
           <boxGeometry args={[0.14, 0.14, 0.16]} />
           <meshStandardMaterial color="#FCD34D" flatShading />
@@ -390,6 +393,7 @@ export function Player() {
           <boxGeometry args={[0.22, 0.62, 0.24]} />
           <meshStandardMaterial color="#1E3A8A" roughness={0.8} flatShading />
         </mesh>
+        {/* Sneaker */}
         <mesh position={[0, -0.68, 0.05]} castShadow>
           <boxGeometry args={[0.24, 0.14, 0.36]} />
           <meshStandardMaterial color="#FAFAFA" roughness={0.5} flatShading />
@@ -402,6 +406,7 @@ export function Player() {
           <boxGeometry args={[0.22, 0.62, 0.24]} />
           <meshStandardMaterial color="#1E3A8A" roughness={0.8} flatShading />
         </mesh>
+        {/* Sneaker */}
         <mesh position={[0, -0.68, 0.05]} castShadow>
           <boxGeometry args={[0.24, 0.14, 0.36]} />
           <meshStandardMaterial color="#FAFAFA" roughness={0.5} flatShading />

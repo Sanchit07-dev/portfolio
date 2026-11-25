@@ -120,7 +120,8 @@ export function WorldEnvironment() {
       <ProjectCastle position={[55, 0, -52]} />
       <CommunicationTower position={[0, 0, -85]} />
       <Windmill position={[68, 0, 42]} />
-      <VillageWell position={[0, 0, 0]} />
+      {/* Well shifted to [0, 0, -6] so spawn point [0, 0, 0] is completely open */}
+      <VillageWell position={[0, 0, -6]} />
       <MarketStall position={[-10, 0, -7]} rotation={Math.PI / 4} stripeColor="#F97316" />
       <MarketStall position={[10, 0, -7]} rotation={-Math.PI / 4} stripeColor="#0284C7" />
       <Campfire position={[-45, 0, -50]} />
