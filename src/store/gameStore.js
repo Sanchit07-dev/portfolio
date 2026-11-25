@@ -24,8 +24,6 @@ const loadSavedState = () => {
   return null;
 };
 
-const saved = loadSavedState();
-
 const loadToy = () => {
   try {
     const raw = localStorage.getItem(TOY_KEY);
@@ -36,7 +34,98 @@ const loadToy = () => {
   return null;
 };
 
-const toySaved = loadToy();
+// ── Save migration ──
+// Every save carries a version. Known shapes are salvaged field-by-field so
+// quest/collectible progress survives; unknown or corrupt shapes are reset.
+const SAVE_VERSION = 2;
+const TOY_VERSION = 2;
+
+function migrateSaveState(parsed, targetVersion) {
+  if (parsed === null || parsed === undefined) return null;
+  const wipe = () => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    return null;
+  };
+  if (typeof parsed !== 'object' || Array.isArray(parsed)) return wipe();
+  const version = Number(parsed.version) || 1;
+  if (version > targetVersion) return wipe();
+
+  const validQuest = (q) => q && typeof q.id === 'string' && typeof q.title === 'string'
+    && typeof q.completed === 'boolean' && typeof q.reward === 'string';
+  const validCollectible = (c) => c && typeof c.id === 'string' && typeof c.name === 'string'
+    && Array.isArray(c.position) && c.position.length === 3 && c.position.every(Number.isFinite);
+
+  const questsOk = Array.isArray(parsed.quests) && parsed.quests.every(validQuest);
+  const collectiblesOk = Array.isArray(parsed.collectibles) && parsed.collectibles.every(validCollectible);
+
+  // Salvage progress by id when a field's shape is outdated, so completed
+  // quests and found collectibles survive a schema change where possible.
+  const completedQuestIds = new Set(
+    Array.isArray(parsed.quests)
+      ? parsed.quests.filter((q) => q && typeof q.id === 'string' && q.completed === true).map((q) => q.id)
+      : []
+  );
+  const collectedIds = new Set(
+    Array.isArray(parsed.collectibles)
+      ? parsed.collectibles.filter((c) => c && typeof c.id === 'string' && c.collected === true).map((c) => c.id)
+      : []
+  );
+
+  const migrated = {
+    version: targetVersion,
+    quests: questsOk
+      ? parsed.quests
+      : QUESTS.map((q) => ({ ...q, completed: completedQuestIds.has(q.id) })),
+    activeQuestId: typeof parsed.activeQuestId === 'string' ? parsed.activeQuestId : 'q1',
+    completedQuests: Array.isArray(parsed.completedQuests)
+      ? parsed.completedQuests.filter((id) => typeof id === 'string')
+      : [],
+    collectibles: collectiblesOk
+      ? parsed.collectibles
+      : COLLECTIBLES.map((c) => ({ ...c, collected: collectedIds.has(c.id) })),
+    inventory: Array.isArray(parsed.inventory) ? parsed.inventory.filter(Boolean) : [],
+    totalXP: Number.isFinite(parsed.totalXP) ? parsed.totalXP : 0,
+  };
+  if (version !== targetVersion || !questsOk || !collectiblesOk) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated)); } catch {}
+  }
+  return migrated;
+}
+
+function migrateToyState(parsed, targetVersion) {
+  if (parsed === null || parsed === undefined) return null;
+  const wipe = () => {
+    try { localStorage.removeItem(TOY_KEY); } catch {}
+    return null;
+  };
+  if (typeof parsed !== 'object' || Array.isArray(parsed)) return wipe();
+  const version = Number(parsed.version) || 1;
+  if (version > targetVersion) return wipe();
+
+  const strArr = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []);
+  const migrated = {
+    version: targetVersion,
+    visitedZones: strArr(parsed.visitedZones),
+    openedProjects: strArr(parsed.openedProjects),
+    foundSecrets: strArr(parsed.foundSecrets),
+    honkCount: Number.isFinite(parsed.honkCount) ? parsed.honkCount : 0,
+    didFlip: parsed.didFlip === true,
+    pinsCleared: parsed.pinsCleared === true,
+    konamiFound: parsed.konamiFound === true,
+    unlockedAchievements: strArr(parsed.unlockedAchievements),
+    carColorId: typeof parsed.carColorId === 'string' ? parsed.carColorId : 'amber',
+    trailId: typeof parsed.trailId === 'string' ? parsed.trailId : 'none',
+    hornId: typeof parsed.hornId === 'string' ? parsed.hornId : 'beep',
+    circuitBestMs: Number.isFinite(parsed.circuitBestMs) ? parsed.circuitBestMs : null,
+  };
+  if (version !== targetVersion) {
+    try { localStorage.setItem(TOY_KEY, JSON.stringify(migrated)); } catch {}
+  }
+  return migrated;
+}
+
+const saved = migrateSaveState(loadSavedState(), SAVE_VERSION);
+const toySaved = migrateToyState(loadToy(), TOY_VERSION);
 
 const initialView = (() => {
   try {
@@ -119,16 +208,32 @@ export const useGameStore = create((set, get) => ({
   teleportTo: null,
   konamiNonce: 0,
 
+  // 3D scene health — set by SceneErrorBoundary, shown by the DOM fallback
+  sceneError: null,
+  sceneNonce: 0,
+
   // Actions
   setGameMode: (mode) => set({ gameMode: mode }),
+
+  reportSceneError: (message) => set({ sceneError: message }),
+  retryScene: () => set({ sceneError: null, sceneNonce: get().sceneNonce + 1 }),
   
   startAdventure: () => {
-    soundManager.init();
-    soundManager.startAmbientMusic();
-    soundManager.startEngine();
+    // Audio is optional — never let a failure here block the game from starting
+    try {
+      soundManager.init();
+      soundManager.startAmbientMusic();
+      soundManager.startEngine();
+    } catch {
+      // Audio unavailable or blocked
+    }
     rememberView('3d');
-    set({ gameMode: 'playing', ambientStarted: true, activePanel: null, isPaused: false });
-    soundManager.playInteract();
+    set({ gameMode: 'playing', ambientStarted: true, activePanel: null, isPaused: false, sceneError: null });
+    try {
+      soundManager.playInteract();
+    } catch {
+      // Ignore
+    }
   },
 
   enterWorldPreview: () => {
@@ -137,10 +242,14 @@ export const useGameStore = create((set, get) => ({
   },
 
   switchToClassic: () => {
-    soundManager.stopAmbientMusic();
-    soundManager.stopEngine();
+    try {
+      soundManager.stopAmbientMusic();
+      soundManager.stopEngine();
+    } catch {
+      // Audio may not be initialized
+    }
     rememberView('classic');
-    set({ gameMode: 'classic', activeModal: null, activePanel: null, isPaused: false });
+    set({ gameMode: 'classic', activeModal: null, activePanel: null, isPaused: false, sceneError: null });
   },
 
   setPaused: (isPaused) => {
@@ -241,6 +350,7 @@ export const useGameStore = create((set, get) => ({
     try {
       const state = get();
       localStorage.setItem(TOY_KEY, JSON.stringify({
+        version: TOY_VERSION,
         visitedZones: state.visitedZones,
         openedProjects: state.openedProjects,
         foundSecrets: state.foundSecrets,
@@ -454,6 +564,7 @@ export const useGameStore = create((set, get) => ({
   saveProgress: () => {
     try {
       const state = {
+        version: SAVE_VERSION,
         quests: get().quests,
         completedQuests: get().completedQuests,
         activeQuestId: get().activeQuestId,

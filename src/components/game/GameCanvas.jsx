@@ -10,6 +10,8 @@ import { Sky } from '@react-three/drei';
 import { WorldEnvironment } from './WorldEnvironment';
 import { Player } from './Player';
 import { useGameStore } from '../../store/gameStore';
+import { SceneErrorBoundary, SceneErrorFallback } from '../ui/GameErrorBoundary';
+import { WorldLoadMonitor } from '../ui/WorldLoadMonitor';
 
 function WorldLighting() {
   const graphicsQuality = useGameStore((state) => state.graphicsQuality);
@@ -57,21 +59,31 @@ function WorldLighting() {
 
 export function GameCanvas() {
   const graphicsQuality = useGameStore((state) => state.graphicsQuality);
+  const sceneError = useGameStore((state) => state.sceneError);
+  const sceneNonce = useGameStore((state) => state.sceneNonce);
 
   return (
     <div className="absolute inset-0 w-full h-full bg-[#96BFD6] overflow-hidden select-none cursor-grab active:cursor-grabbing">
-      <Canvas
-        shadows={graphicsQuality === 'high'}
-        dpr={graphicsQuality === 'high' ? [1, 2] : [1, 1]}
-        camera={{ position: [0, 8, 12], fov: 50, near: 0.1, far: 380 }}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-      >
-        <Suspense fallback={null}>
-          <WorldLighting />
-          <WorldEnvironment />
-          <Player />
-        </Suspense>
-      </Canvas>
+      {sceneError ? (
+        <SceneErrorFallback />
+      ) : (
+        <Canvas
+          key={sceneNonce}
+          shadows={graphicsQuality === 'high'}
+          dpr={graphicsQuality === 'high' ? [1, 2] : [1, 1]}
+          camera={{ position: [0, 8, 12], fov: 50, near: 0.1, far: 380 }}
+          gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        >
+          <Suspense fallback={null}>
+            <SceneErrorBoundary>
+              <WorldLighting />
+              <WorldEnvironment />
+              <Player />
+            </SceneErrorBoundary>
+          </Suspense>
+        </Canvas>
+      )}
+      <WorldLoadMonitor />
     </div>
   );
 }

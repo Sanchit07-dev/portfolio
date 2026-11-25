@@ -61,6 +61,7 @@ export function CinematicIntro() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
           <button
             onClick={startAdventure}
+            data-testid="start-adventure-button"
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-accent transition-all transform hover:scale-105 flex items-center justify-center gap-2"
           >
             <Play size={16} fill="white" />
@@ -69,6 +70,7 @@ export function CinematicIntro() {
 
           <button
             onClick={switchToClassic}
+            data-testid="view-portfolio-button"
             className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-neutral-200 hover:text-white border border-neutral-700 font-semibold text-sm transition-all flex items-center justify-center gap-2"
           >
             <Eye size={16} />

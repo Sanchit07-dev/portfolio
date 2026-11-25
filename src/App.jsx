@@ -8,6 +8,7 @@ import { useGameStore } from './store/gameStore';
 
 // 3D Game components
 import { GameCanvas } from './components/game/GameCanvas';
+import { GameErrorBoundary } from './components/ui/GameErrorBoundary';
 import { HUD } from './components/ui/HUD';
 import { MobileControls } from './components/ui/MobileControls';
 import { GameModals } from './components/ui/GameModals';
@@ -62,8 +63,10 @@ export default function App() {
   // 3D RPG Game Mode ('intro' or 'playing')
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#A7C7E7]">
-      {/* 3D Three.js Open World Canvas */}
-      <GameCanvas />
+      {/* 3D Three.js Open World Canvas (guarded by an error boundary) */}
+      <GameErrorBoundary>
+        <GameCanvas />
+      </GameErrorBoundary>
 
       {/* RPG HUD (MiniMap, Quest Tracker, XP bar, Interactivity) */}
       <HUD />
