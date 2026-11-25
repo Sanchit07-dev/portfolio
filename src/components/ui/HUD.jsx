@@ -1,17 +1,14 @@
 // ─────────────────────────────────────────────
-// RPG HUD (HEADS-UP DISPLAY) & CONTROLS OVERLAY
-// Top Left: Player Level, Name, XP Bar
-// Top Right: MiniMap & Audio Mute / Menu Toggles
-// Bottom Left: WASD / Mouse Controls Guide
-// Bottom Right: Active Quest Tracker
-// Center: [E] INTERACT prompt & Quest Notifications
+// RPG HUD & FANTASY GAME UI PANELS
+// Themed with rich parchment, dark slate borders (#292524), wood accents (#78350F),
+// game hotbar slots, real-time quest objective tracker, and sound controls
 // ─────────────────────────────────────────────
 
 import React from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { DEVELOPER_PROFILE } from '../../data/gameData';
 import { MiniMap } from './MiniMap';
-import { Volume2, VolumeX, Menu, BookOpen, Backpack, Map, Sparkles, Move, Eye, HelpCircle } from 'lucide-react';
+import { Volume2, VolumeX, Menu, BookOpen, Backpack, Sparkles, HelpCircle, Compass, Scroll } from 'lucide-react';
 
 export function HUD() {
   const nearbyInteractable = useGameStore((state) => state.nearbyInteractable);
@@ -29,91 +26,93 @@ export function HUD() {
   const completedCount = quests.filter((q) => q.completed).length;
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-between p-4 sm:p-6 select-none">
+    <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-between p-3 sm:p-5 select-none font-sans">
       {/* ─── TOP BAR ─── */}
       <div className="flex items-start justify-between w-full">
-        {/* Top Left: Player Profile Badge */}
-        <div className="flex items-center gap-3 bg-white/90 backdrop-blur-md border border-neutral-200/90 rounded-2xl p-2.5 sm:p-3 shadow-card pointer-events-auto">
+        {/* Top Left: Character Profile Panel (Wood & Gold Border) */}
+        <div className="flex items-center gap-3 bg-[#1C1917]/90 text-white backdrop-blur-md border-2 border-[#78350F] rounded-2xl p-2.5 sm:p-3 shadow-2xl pointer-events-auto">
           {/* Avatar Icon */}
-          <div className="relative w-11 h-11 rounded-xl bg-orange-500 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center text-white font-black text-lg border-2 border-amber-300 shadow-md">
             <span>S</span>
-            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white" />
+            <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#1C1917]" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-neutral-900 tracking-tight">
+              <span className="font-extrabold text-xs sm:text-sm text-amber-100 tracking-wide">
                 {DEVELOPER_PROFILE.name}
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full border border-orange-200">
+              <span className="text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/40">
                 Lv. {DEVELOPER_PROFILE.level}
               </span>
             </div>
-            <p className="text-[11px] text-neutral-500 font-medium">
-              {DEVELOPER_PROFILE.title}
+            <p className="text-[10px] sm:text-[11px] text-neutral-400 font-medium">
+              {DEVELOPER_PROFILE.role}
             </p>
 
             {/* XP Bar */}
             <div className="flex items-center gap-1.5 mt-1.5">
-              <div className="w-24 sm:w-32 h-1.5 rounded-full bg-neutral-200 overflow-hidden">
+              <div className="w-24 sm:w-32 h-2 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-400 transition-all duration-500"
                   style={{ width: `${Math.min(100, (totalXP / 750) * 100)}%` }}
                 />
               </div>
-              <span className="text-[9px] font-mono text-neutral-400 font-semibold">
+              <span className="text-[9px] font-mono text-amber-400 font-bold">
                 {totalXP} XP
               </span>
             </div>
           </div>
         </div>
 
-        {/* Top Right: Radar & Quick Action Buttons */}
+        {/* Top Right: Game Hotbar & MiniMap */}
         <div className="flex flex-col items-end gap-2.5">
-          <div className="flex items-center gap-2 pointer-events-auto">
-            {/* Switch to Classic Web Mode */}
+          {/* RPG Action Hotbar */}
+          <div className="flex items-center gap-1.5 bg-[#1C1917]/90 p-1.5 rounded-2xl border-2 border-[#78350F] shadow-2xl pointer-events-auto">
+            {/* Classic View Pill */}
             <button
               onClick={switchToClassic}
-              className="bg-white/90 hover:bg-white text-neutral-700 hover:text-neutral-900 border border-neutral-200 rounded-xl px-3 py-2 text-xs font-semibold shadow-card transition-all flex items-center gap-1.5 hover:border-orange-500/40"
+              className="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white border border-amber-400/50 rounded-xl px-3 py-1.5 text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
               title="Standard Website Mode"
             >
+              <Scroll size={13} />
               <span>Classic View</span>
             </button>
 
-            {/* Sound Toggle */}
+            {/* Audio Toggle */}
             <button
               onClick={toggleAudio}
-              className="w-9 h-9 rounded-xl bg-white/90 hover:bg-white border border-neutral-200 flex items-center justify-center text-neutral-700 shadow-card transition-colors hover:text-orange-600"
+              className="w-8 h-8 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 border border-neutral-700 flex items-center justify-center text-amber-300 shadow-sm transition-all"
               title={isMuted ? "Unmute Audio" : "Mute Audio"}
             >
-              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
             </button>
 
-            {/* Inventory Menu Button */}
+            {/* Inventory Slot */}
             <button
               onClick={() => openModal('inventory')}
-              className="w-9 h-9 rounded-xl bg-white/90 hover:bg-white border border-neutral-200 flex items-center justify-center text-neutral-700 shadow-card transition-colors hover:text-orange-600"
-              title="Inventory & Badges"
+              className="w-8 h-8 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 border border-neutral-700 flex items-center justify-center text-amber-300 shadow-sm transition-all"
+              title="Adventurer Inventory"
             >
-              <Backpack size={16} />
+              <Backpack size={15} />
             </button>
 
-            {/* Quests Menu Button */}
+            {/* Quest Log Slot */}
             <button
               onClick={() => openModal('quests')}
-              className="w-9 h-9 rounded-xl bg-white/90 hover:bg-white border border-neutral-200 flex items-center justify-center text-neutral-700 shadow-card transition-colors hover:text-orange-600"
-              title="Quest Log"
+              className="w-8 h-8 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 border border-neutral-700 flex items-center justify-center text-amber-300 shadow-sm transition-all"
+              title="Quest Journal"
             >
-              <BookOpen size={16} />
+              <BookOpen size={15} />
             </button>
 
-            {/* Pause Menu */}
+            {/* Menu Slot */}
             <button
               onClick={() => setPaused(true)}
-              className="w-9 h-9 rounded-xl bg-white/90 hover:bg-white border border-neutral-200 flex items-center justify-center text-neutral-700 shadow-card transition-colors hover:text-orange-600"
-              title="Game Menu"
+              className="w-8 h-8 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 border border-neutral-700 flex items-center justify-center text-amber-300 shadow-sm transition-all"
+              title="Pause Menu"
             >
-              <Menu size={16} />
+              <Menu size={15} />
             </button>
           </div>
 
@@ -126,31 +125,31 @@ export function HUD() {
       <div className="flex flex-col items-center justify-center gap-3">
         {/* Quest Complete / Relic Notification Popup */}
         {questNotification && (
-          <div className="animate-bounce bg-white border-2 border-orange-500 shadow-2xl rounded-2xl px-6 py-3.5 flex items-center gap-3 pointer-events-auto">
-            <div className="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
+          <div className="animate-bounce bg-[#1C1917]/95 text-white border-2 border-amber-500 shadow-2xl rounded-2xl px-6 py-3 flex items-center gap-3 pointer-events-auto">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center">
               <Sparkles size={18} />
             </div>
             <div>
-              <p className="text-xs font-bold text-orange-600 uppercase tracking-wider">
+              <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
                 {questNotification.title}
               </p>
-              <p className="text-sm font-semibold text-neutral-900">
+              <p className="text-xs sm:text-sm font-bold text-neutral-100">
                 {questNotification.message}
               </p>
             </div>
           </div>
         )}
 
-        {/* [E] INTERACT PROMPT */}
+        {/* [E] INTERACT PROMPT BANNER */}
         {nearbyInteractable && (
           <div
             onClick={() => useGameStore.getState().triggerInteract()}
-            className="cursor-pointer group flex items-center gap-3 bg-neutral-900/90 text-white backdrop-blur-md px-5 py-3 rounded-2xl border border-neutral-700 shadow-2xl hover:bg-orange-600 transition-all transform hover:scale-105 pointer-events-auto"
+            className="cursor-pointer group flex items-center gap-3 bg-[#1C1917]/95 text-white backdrop-blur-md px-6 py-3 rounded-2xl border-2 border-amber-500 shadow-2xl hover:bg-amber-600 transition-all transform hover:scale-105 active:scale-95 pointer-events-auto"
           >
-            <span className="w-7 h-7 rounded-lg bg-orange-500 group-hover:bg-white text-white group-hover:text-neutral-900 font-mono font-bold text-xs flex items-center justify-center shadow-inner">
+            <span className="w-7 h-7 rounded-lg bg-amber-500 group-hover:bg-white text-white group-hover:text-neutral-900 font-mono font-black text-xs flex items-center justify-center shadow-inner">
               E
             </span>
-            <span className="text-xs sm:text-sm font-semibold tracking-wide">
+            <span className="text-xs sm:text-sm font-extrabold tracking-wide text-amber-100 group-hover:text-white">
               {nearbyInteractable.actionText}
             </span>
           </div>
@@ -159,52 +158,52 @@ export function HUD() {
 
       {/* ─── BOTTOM BAR ─── */}
       <div className="flex items-end justify-between w-full">
-        {/* Bottom Left: Controls Guide */}
-        <div className="hidden sm:flex flex-col gap-1.5 bg-white/85 backdrop-blur-md border border-neutral-200/80 rounded-2xl p-3 shadow-card pointer-events-auto">
-          <div className="flex items-center gap-2 text-xs font-semibold text-neutral-800 mb-0.5">
-            <HelpCircle size={13} className="text-orange-500" />
-            <span>Controls Guide</span>
+        {/* Bottom Left: Controls Legend */}
+        <div className="hidden sm:flex flex-col gap-1.5 bg-[#1C1917]/90 text-white backdrop-blur-md border-2 border-[#78350F] rounded-2xl p-3 shadow-2xl pointer-events-auto">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-0.5">
+            <HelpCircle size={13} className="text-amber-400" />
+            <span>Adventurer Controls</span>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-neutral-600">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-neutral-300">
             <div className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-[10px]">WASD</kbd>
-              <span>Move</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">WASD</kbd>
+              <span>Move & Slide</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-[10px]">Space</kbd>
+              <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">Space</kbd>
               <span>Jump</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-[10px]">Shift</kbd>
+              <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">Shift</kbd>
               <span>Sprint</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-[10px]">Mouse</kbd>
+              <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">Mouse</kbd>
               <span>Orbit Cam</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-[10px]">E</kbd>
-              <span>Interact</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">E</kbd>
+              <span>Interact / Talk</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-[10px]">ESC</kbd>
-              <span>Pause</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">ESC</kbd>
+              <span>Pause Menu</span>
             </div>
           </div>
         </div>
 
-        {/* Bottom Right: Active Quest Tracker Card */}
-        <div className="bg-white/90 backdrop-blur-md border border-neutral-200/90 rounded-2xl p-3.5 shadow-card max-w-xs pointer-events-auto">
+        {/* Bottom Right: Active Quest Parchment Scroll */}
+        <div className="bg-[#1C1917]/90 text-white backdrop-blur-md border-2 border-[#78350F] rounded-2xl p-3.5 shadow-2xl max-w-xs pointer-events-auto">
           <div className="flex items-center justify-between gap-3 mb-1">
             <div className="flex items-center gap-1.5">
-              <Sparkles size={13} className="text-orange-500" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600">
-                Active Quest ({completedCount}/{quests.length})
+              <Sparkles size={13} className="text-amber-400" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                Active Objective ({completedCount}/{quests.length})
               </span>
             </div>
             <button
               onClick={() => openModal('quests')}
-              className="text-[10px] text-neutral-400 hover:text-neutral-700 font-medium underline"
+              className="text-[10px] text-neutral-400 hover:text-amber-300 font-semibold underline"
             >
               Log
             </button>
@@ -212,19 +211,19 @@ export function HUD() {
 
           {activeQuest ? (
             <div>
-              <p className="text-xs font-bold text-neutral-900 mb-0.5">
+              <p className="text-xs font-bold text-amber-100 mb-0.5">
                 {activeQuest.title}
               </p>
-              <p className="text-[11px] text-neutral-600 leading-snug">
+              <p className="text-[11px] text-neutral-300 leading-snug">
                 {activeQuest.objective}
               </p>
-              <div className="mt-2 flex items-center justify-between text-[10px] text-neutral-500 font-medium pt-1.5 border-t border-neutral-100">
-                <span>Target: {activeQuest.locationName}</span>
-                <span className="text-orange-600 font-semibold">{activeQuest.reward}</span>
+              <div className="mt-2 flex items-center justify-between text-[10px] text-neutral-400 font-medium pt-1.5 border-t border-neutral-800">
+                <span>Target: <span className="text-neutral-200 font-bold">{activeQuest.locationName}</span></span>
+                <span className="text-amber-400 font-bold">{activeQuest.reward}</span>
               </div>
             </div>
           ) : (
-            <p className="text-xs text-emerald-600 font-semibold">
+            <p className="text-xs text-emerald-400 font-bold">
               All Quests Accomplished! Realm Master.
             </p>
           )}

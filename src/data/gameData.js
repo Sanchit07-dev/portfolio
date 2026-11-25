@@ -14,7 +14,7 @@ export const DEVELOPER_PROFILE = {
   class: "Code Sorcerer / Full-Stack Engineer",
   location: "Pune, India",
   email: "sanchitbaviskar07@gmail.com",
-  github: "https://github.com/sanchitbaviskar",
+  github: "https://github.com/Sanchit07-dev/portfolio",
   linkedin: "https://www.linkedin.com/in/sanchit-baviskar-5a676b251",
   availableForHire: true,
   summary: "Building robust, production-grade web applications with React, Node.js, and PostgreSQL. Focused on clean architecture, performance, and business outcomes.",
@@ -40,11 +40,11 @@ export const DEVELOPER_PROFILE = {
   ]
 };
 
-// RPG Locations with 3D world coordinates
+// RPG Locations with updated 3D world coordinates across expanded map
 export const WORLD_LOCATIONS = [
   {
     id: 'spawn',
-    name: 'Spawn Village',
+    name: 'Village Square',
     category: 'Introduction',
     coordinates: [0, 0, 0],
     color: '#3B82F6',
@@ -54,31 +54,31 @@ export const WORLD_LOCATIONS = [
     dialogue: [
       "Welcome, Adventurer! You have arrived at Developer Quest.",
       "This world is an interactive realm exploring Sanchit Baviskar's work, code, and engineering journey.",
-      "Explore the path ahead! Visit the Developer House to learn about Sanchit, inspect the Skill Grounds, brave the Project Castle, scale Achievement Mountain, and send your message from the Communication Tower!"
+      "Explore the path ahead! Enter the Developer House to the west, inspect the Skill Grounds, brave Project Castle, check Farmland achievements, and send your transmission from the Signal Tower to the north!"
     ]
   },
   {
     id: 'house',
     name: 'Developer House',
     category: 'About Me',
-    coordinates: [-28, 0, -18],
+    coordinates: [-35, 0, -22],
     color: '#10B981',
-    description: 'A cozy low-poly cottage housing Sanchit\'s personal story, background, and development philosophy.',
-    npcName: 'Sanchit (Avatar)',
+    description: 'A cozy cottage with open doors housing Sanchit\'s personal workshop, desk, and background.',
+    npcName: 'Sanchit Baviskar',
     npcTitle: 'Full-Stack Developer',
     dialogue: [
-      "Hey there! Welcome to my digital workshop.",
+      "Hey there! Welcome to my workshop.",
       "I am a full-stack engineer based in Pune, India, building modern web apps with React, Node.js, and PostgreSQL.",
-      "Take a look around my house to see my background, journey, and principles!"
+      "Step right inside the doorway to inspect my background, education, and principles!"
     ]
   },
   {
     id: 'skills',
     name: 'Skill Training Grounds',
     category: 'Technical Skills',
-    coordinates: [-32, 0, 24],
+    coordinates: [-55, 0, 24],
     color: '#8B5CF6',
-    description: 'An ancient stone training dojo displaying all verified technical abilities and weapon proficiencies.',
+    description: 'An ancient stone training dojo displaying verified technical abilities and weapon proficiencies.',
     npcName: 'Master Syntax',
     npcTitle: 'Training Master',
     dialogue: [
@@ -90,7 +90,7 @@ export const WORLD_LOCATIONS = [
     id: 'castle',
     name: 'Project Castle',
     category: 'Featured Projects',
-    coordinates: [30, 0, -26],
+    coordinates: [55, 0, -52],
     color: '#F97316',
     description: 'A grand stone citadel safeguarding Sanchit\'s verified software projects and applications.',
     npcName: 'Archivist Thorne',
@@ -102,15 +102,15 @@ export const WORLD_LOCATIONS = [
   },
   {
     id: 'mountain',
-    name: 'Achievement Mountain',
+    name: 'Achievement Highlands',
     category: 'Milestones & Services',
-    coordinates: [34, 0, 26],
+    coordinates: [62, 0, 48],
     color: '#EC4899',
-    description: 'A majestic crystalline summit showcasing milestones, freelance capabilities, and client services.',
-    npcName: 'High Priestess Althea',
+    description: 'A majestic highland summit showcasing milestones, freelance capabilities, and client services.',
+    npcName: 'Priestess Althea',
     npcTitle: 'Keeper of Records',
     dialogue: [
-      "You have climbed high, traveler! Here stand the monoliths of verified milestones and freelance offerings.",
+      "You have traveled far across the highlands! Here stand the monoliths of verified milestones and freelance offerings.",
       "From full-stack web builds to custom APIs and secure database integrations, discover what Sanchit delivers!"
     ]
   },
@@ -118,13 +118,13 @@ export const WORLD_LOCATIONS = [
     id: 'tower',
     name: 'Communication Tower',
     category: 'Contact & Hire',
-    coordinates: [0, 0, -45],
+    coordinates: [0, 0, -85],
     color: '#06B6D4',
     description: 'A towering beacon of signal crystals connecting this realm directly to Sanchit\'s inbox.',
     npcName: 'Beacon Operator Lyra',
     npcTitle: 'Communications Officer',
     dialogue: [
-      "Signal strong! This tower connects you directly to Sanchit Baviskar.",
+      "Transmission signal strong! This tower connects you directly to Sanchit Baviskar.",
       "Have an upcoming project, freelance inquiry, or engineering role? Send a transmission right now through the console!"
     ]
   }
@@ -207,10 +207,10 @@ export const QUESTS = [
   },
   {
     id: 'q4',
-    title: 'Scale Achievement Mountain',
+    title: 'Explore the Highlands',
     targetLocation: 'mountain',
-    locationName: 'Achievement Mountain',
-    objective: 'Reach the summit to inspect milestones, services, and engineering workflow.',
+    locationName: 'Achievement Highlands',
+    objective: 'Reach the highland summit to inspect milestones, services, and engineering workflow.',
     reward: 'Peak Badge & 150 XP',
     completed: false
   },
@@ -219,18 +219,18 @@ export const QUESTS = [
     title: 'Establish Communication',
     targetLocation: 'tower',
     locationName: 'Communication Tower',
-    objective: 'Reach the Communication Tower and submit a transmission or grab contact info.',
+    objective: 'Reach the Communication Tower to the north and submit a transmission.',
     reward: 'Crystal Transmitter & 250 XP',
     completed: false
   }
 ];
 
 export const COLLECTIBLES = [
-  { id: 'badge-react', name: 'React Orb', icon: 'Atom', category: 'Frontend', desc: 'Mastery of reactive UI components and state.', position: [-12, 1, 8], collected: false },
-  { id: 'badge-js', name: 'JavaScript Crystal', icon: 'FileCode', category: 'Language', desc: 'The bedrock tongue of the web universe.', position: [12, 1, -10], collected: false },
-  { id: 'badge-node', name: 'Node.js Core', icon: 'Server', category: 'Backend', desc: 'Empowers server-side asynchronous execution.', position: [-20, 1, 15], collected: false },
-  { id: 'badge-pg', name: 'Postgres Relic', icon: 'Database', category: 'Database', desc: 'Relational data permanence and query power.', position: [20, 1, 15], collected: false },
-  { id: 'badge-git', name: 'Git Branch Key', icon: 'GitBranch', category: 'Tooling', desc: 'Time-travel and collaboration across dimensions.', position: [0, 1, -25], collected: false },
+  { id: 'badge-react', name: 'React Orb', icon: 'Atom', category: 'Frontend', desc: 'Mastery of reactive UI components and state.', position: [-16, 1, 10], collected: false },
+  { id: 'badge-js', name: 'JavaScript Crystal', icon: 'FileCode', category: 'Language', desc: 'The bedrock tongue of the web universe.', position: [16, 1, -12], collected: false },
+  { id: 'badge-node', name: 'Node.js Core', icon: 'Server', category: 'Backend', desc: 'Empowers server-side asynchronous execution.', position: [-38, 1, 30], collected: false },
+  { id: 'badge-pg', name: 'Postgres Relic', icon: 'Database', category: 'Database', desc: 'Relational data permanence and query power.', position: [38, 1, 25], collected: false },
+  { id: 'badge-git', name: 'Git Branch Key', icon: 'GitBranch', category: 'Tooling', desc: 'Time-travel and collaboration across dimensions.', position: [0, 1, -45], collected: false },
 ];
 
 export { existingProjects, existingServices };
