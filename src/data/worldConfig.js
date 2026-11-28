@@ -30,6 +30,17 @@ export const WORLD_ZONES = [
   { id: 'beacon_hill', name: 'Signal Spire Peak', center: [0, 0, -80], radius: 35, color: '#06B6D4' }
 ];
 
+// Data-driven safe respawn locations across the realm
+export const RESPAWN_POINTS = [
+  { id: 'village', name: 'Village Square', pos: [0, 0.6, 2.5] },
+  { id: 'house', name: 'Developer Workshop', pos: [-32, 0.6, -18] },
+  { id: 'skills', name: 'Training Grounds', pos: [-50, 0.6, 24] },
+  { id: 'castle', name: 'Project Castle', pos: [50, 0.6, -45] },
+  { id: 'tower', name: 'Signal Spire', pos: [0, 0.6, -78] },
+  { id: 'lake', name: 'Azure Lake Pier', pos: [-45, 0.6, 36] },
+  { id: 'farmland', name: 'Golden Farmlands', pos: [50, 0.6, 38] }
+];
+
 // All Interactive NPCs across the world
 export const WORLD_NPCS = [
   {

@@ -8,6 +8,7 @@ import { QUESTS, COLLECTIBLES, WORLD_LOCATIONS, DEVELOPER_PROFILE, existingProje
 import { soundManager } from '../utils/soundManager';
 import { ACHIEVEMENTS, ZONE_IDS } from '../data/achievements';
 import { CAR_COLORS, HORNS, SECRETS, TRAILS, VEHICLE, prefersLightweightDevice } from '../config/toyWorld';
+import { RESPAWN_POINTS } from '../data/worldConfig';
 
 const STORAGE_KEY = 'dev_quest_save_state_v1';
 const TOY_KEY = 'toy_world_save_v1';
@@ -60,8 +61,9 @@ function rememberView(mode) {
 }
 
 export const useGameStore = create((set, get) => ({
-  // Core game flow state
-  gameMode: initialView, // 'intro' | 'cinematic' | 'playing' | 'classic'
+  // Single game-state machine: 'loading' | 'menu' | 'playing' | 'paused' | 'modal' | 'classic'
+  gameState: initialView === 'classic' ? 'classic' : 'loading',
+  gameMode: initialView, // backward compatibility: 'intro' | 'playing' | 'classic'
   isPaused: false,
   activeModal: null, // null | 'house' | 'skills' | 'castle' | 'mountain' | 'tower' | 'project-detail' | 'inventory' | 'quests' | 'map'
   activeProject: null,
@@ -71,10 +73,11 @@ export const useGameStore = create((set, get) => ({
   ambientStarted: false,
 
   // Player position & movement
-  playerPos: [0, 0, 0],
+  playerPos: [0, 0.5, 2.5],
   playerRotation: 0,
   currentLocation: WORLD_LOCATIONS[0],
   nearbyInteractable: null, // { id, name, type, actionText, data }
+  teleportTarget: null, // [x, y, z] requested teleport position
 
   // Quests & progress
   quests: saved?.quests || QUESTS,
@@ -88,10 +91,11 @@ export const useGameStore = create((set, get) => ({
   totalXP: saved?.totalXP || 0,
   level: DEVELOPER_PROFILE.level,
 
-  // UI settings
-  graphicsQuality: lightweight ? 'low' : 'high', // 'high' | 'medium' | 'low'
+  // Quality presets & Auto-detection
+  graphicsQuality: lightweight ? 'low' : 'high', // 'high' | 'low'
+  lowFpsCount: 0,
   touchControls: false,
-  movementMode: 'drive', // 'drive' | 'walk'
+  movementMode: 'walk', // 'walk' | 'drive'
   reduceMotion: false,
   lockTime: false,
   timeOfDay: 0.32,
@@ -99,7 +103,7 @@ export const useGameStore = create((set, get) => ({
   showQuestTracker: false,
   activePanel: null,
   suggestLightweight: lightweight,
-  bootProgress: 12,
+  bootProgress: 100,
   visitedZones: toySaved?.visitedZones || [],
   openedProjects: toySaved?.openedProjects || [],
   foundSecrets: toySaved?.foundSecrets || [],
@@ -119,11 +123,22 @@ export const useGameStore = create((set, get) => ({
   teleportTo: null,
   konamiNonce: 0,
 
-  // Actions
-  setGameMode: (mode) => set({ gameMode: mode }),
+  // State machine transition actions
+  setGameState: (state) => {
+    const isPaused = state === 'paused';
+    const gameMode = state === 'classic' ? 'classic' : (state === 'menu' || state === 'loading' ? 'intro' : 'playing');
+    set({ gameState: state, gameMode, isPaused });
+  },
+
+  finishLoading: () => {
+    if (get().gameState === 'loading') {
+      set({ gameState: 'menu', gameMode: 'intro' });
+    }
+  },
   
   startAdventure: () => {
     set({
+      gameState: 'playing',
       gameMode: 'playing',
       ambientStarted: true,
       activePanel: null,
@@ -142,7 +157,7 @@ export const useGameStore = create((set, get) => ({
   },
 
   enterWorldPreview: () => {
-    set({ gameMode: 'intro', activeModal: null, activePanel: null, isPaused: false });
+    set({ gameState: 'menu', gameMode: 'intro', activeModal: null, activePanel: null, isPaused: false });
     try {
       rememberView('3d');
     } catch {
@@ -152,6 +167,7 @@ export const useGameStore = create((set, get) => ({
 
   switchToClassic: () => {
     set({
+      gameState: 'classic',
       gameMode: 'classic',
       activeModal: null,
       activePanel: null,
@@ -168,7 +184,12 @@ export const useGameStore = create((set, get) => ({
 
   setPaused: (isPaused) => {
     soundManager.playClick();
-    set({ isPaused });
+    if (isPaused) {
+      set({ gameState: 'paused', isPaused: true });
+    } else {
+      const returnState = get().activeModal ? 'modal' : 'playing';
+      set({ gameState: returnState, isPaused: false });
+    }
   },
 
   toggleAudio: () => {
@@ -179,6 +200,70 @@ export const useGameStore = create((set, get) => ({
 
   setPlayerPos: (pos) => set({ playerPos: pos }),
   setPlayerRotation: (rot) => set({ playerRotation: rot }),
+
+  // Respawn & Stuck handling
+  respawnPlayer: (targetPoint = null) => {
+    const { playerPos } = get();
+    let chosen = targetPoint;
+    if (!chosen) {
+      // Find nearest respawn point
+      let minDist = Infinity;
+      chosen = RESPAWN_POINTS[0];
+      for (const p of RESPAWN_POINTS) {
+        const d = Math.hypot(playerPos[0] - p.pos[0], playerPos[2] - p.pos[2]);
+        if (d < minDist) {
+          minDist = d;
+          chosen = p;
+        }
+      }
+    }
+    set({
+      teleportTarget: [...chosen.pos],
+      respawnNonce: get().respawnNonce + 1,
+      isPaused: false,
+      activeModal: null,
+      activePanel: null,
+    });
+    get().toast(`Teleported to safe grounds (${chosen.name})`);
+    try {
+      soundManager.playClick();
+    } catch {
+      // ignore
+    }
+  },
+
+  clearTeleportTarget: () => set({ teleportTarget: null }),
+
+  // Quality Presets with FPS Auto-detection
+  setGraphicsQuality: (quality) => {
+    set({ graphicsQuality: quality, lowFpsCount: 0 });
+    get().toast(`Graphics set to ${quality.toUpperCase()}`);
+  },
+
+  recordFPS: (fps) => {
+    const { graphicsQuality, lowFpsCount } = get();
+    if (graphicsQuality === 'high') {
+      if (fps < 28) {
+        const nextCount = lowFpsCount + 1;
+        if (nextCount >= 3) {
+          set({ graphicsQuality: 'low', lowFpsCount: 0 });
+          get().toast('Graphics adjusted to LOW for smooth 60 FPS performance');
+        } else {
+          set({ lowFpsCount: nextCount });
+        }
+      } else if (fps >= 35 && lowFpsCount > 0) {
+        set({ lowFpsCount: 0 });
+      }
+    }
+  },
+
+  toast: (message) => {
+    const id = Date.now() + Math.random();
+    set({ toasts: [...get().toasts.slice(-4), { id, message }] });
+    setTimeout(() => {
+      set({ toasts: get().toasts.filter((t) => t.id !== id) });
+    }, 3200);
+  },
   
   setCurrentLocation: (loc) => {
     if (get().currentLocation?.id !== loc.id) {

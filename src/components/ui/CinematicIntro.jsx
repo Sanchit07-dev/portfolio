@@ -12,11 +12,13 @@ import { DEVELOPER_PROFILE } from '../../data/gameData';
 import { Play, Eye, RotateCcw, Volume2, VolumeX, X, HelpCircle, Sparkles } from 'lucide-react';
 
 export function CinematicIntro() {
+  const gameState = useGameStore((state) => state.gameState);
   const gameMode = useGameStore((state) => state.gameMode);
   const startAdventure = useGameStore((state) => state.startAdventure);
   const switchToClassic = useGameStore((state) => state.switchToClassic);
 
-  if (gameMode !== 'intro') return null;
+  // Show intro only when in 'menu' state and not during initial asset loading
+  if (gameState === 'loading' || (gameState !== 'menu' && gameMode !== 'intro')) return null;
 
   const handleStartClick = () => {
     startAdventure();
@@ -91,6 +93,7 @@ export function CinematicIntro() {
 }
 
 export function PauseMenu() {
+  const gameState = useGameStore((state) => state.gameState);
   const isPaused = useGameStore((state) => state.isPaused);
   const activeModal = useGameStore((state) => state.activeModal);
   const setPaused = useGameStore((state) => state.setPaused);
@@ -100,9 +103,10 @@ export function PauseMenu() {
   const toggleAudio = useGameStore((state) => state.toggleAudio);
   const graphicsQuality = useGameStore((state) => state.graphicsQuality);
   const setGraphicsQuality = useGameStore((state) => state.setGraphicsQuality);
+  const respawnPlayer = useGameStore((state) => state.respawnPlayer);
 
   // If a modal (like castle or skills) is open, modal handles itself
-  if (!isPaused || activeModal) return null;
+  if ((!isPaused && gameState !== 'paused') || activeModal) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/60 backdrop-blur-sm select-none">
@@ -142,6 +146,14 @@ export function PauseMenu() {
             className="w-full py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold text-xs transition-colors"
           >
             Adventurer Inventory
+          </button>
+
+          <button
+            onClick={() => respawnPlayer()}
+            className="w-full py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 border border-amber-500/30 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+          >
+            <RotateCcw size={14} className="text-amber-600" />
+            <span>I'm Stuck (Respawn - R)</span>
           </button>
 
           <button

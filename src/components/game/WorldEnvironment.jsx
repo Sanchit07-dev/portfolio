@@ -6,6 +6,7 @@
 
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
+import { RigidBody, CylinderCollider, CuboidCollider } from '@react-three/rapier';
 import {
   DeveloperHouse,
   TownHall,
@@ -21,7 +22,7 @@ import {
 import { LowPolyTree, LowPolyRoundTree, LowPolyRock, FloatingBadgeItem, WorldBeacon } from './WorldAssets';
 import { NPC } from './NPC';
 import { WORLD_LOCATIONS } from '../../data/gameData';
-import { WORLD_BOUNDS, WORLD_NPCS, generateVegetationAndRocks } from '../../data/worldConfig';
+import { WORLD_BOUNDS, WORLD_NPCS, STATIC_COLLIDERS, generateVegetationAndRocks } from '../../data/worldConfig';
 import { useGameStore } from '../../store/gameStore';
 
 export function WorldEnvironment() {
@@ -29,7 +30,7 @@ export function WorldEnvironment() {
   const collectItem = useGameStore((state) => state.collectItem);
 
   // Generate 220 procedurally positioned trees & rocks with reproducible seed
-  const { trees, rocks } = useMemo(() => {
+  const { trees, rocks, dynamicColliders } = useMemo(() => {
     return generateVegetationAndRocks(220, 108);
   }, []);
 
@@ -169,6 +170,30 @@ export function WorldEnvironment() {
 
       {rocks.map((r, idx) => (
         <LowPolyRock key={`rock-${idx}`} position={r.pos} scale={r.scale} rotation={r.rot} />
+      ))}
+
+      {/* ── 10. RAPIER PHYSICS GROUND & SCENERY COLLIDERS ── */}
+      {/* Ground plane collider */}
+      <RigidBody type="fixed" colliders={false} position={[0, -0.5, 0]}>
+        <CuboidCollider args={[WORLD_BOUNDS.radius + 10, 0.5, WORLD_BOUNDS.radius + 10]} />
+      </RigidBody>
+
+      {/* Static structures and wall colliders */}
+      {STATIC_COLLIDERS.map((col, idx) => (
+        <RigidBody key={`sc-col-${idx}`} type="fixed" colliders={false} position={[col.x, 1.8, col.z]}>
+          {col.type === 'circle' ? (
+            <CylinderCollider args={[2.5, col.r]} />
+          ) : (
+            <CuboidCollider args={[col.hw, 2.5, col.hd]} />
+          )}
+        </RigidBody>
+      ))}
+
+      {/* Trees & rocks colliders */}
+      {dynamicColliders.map((col, idx) => (
+        <RigidBody key={`dyn-col-${idx}`} type="fixed" colliders={false} position={[col.x, 1.8, col.z]}>
+          <CylinderCollider args={[2.5, col.r]} />
+        </RigidBody>
       ))}
     </group>
   );

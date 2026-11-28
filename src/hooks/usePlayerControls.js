@@ -19,6 +19,7 @@ export function usePlayerControls() {
   const [movement, setMovement] = useState(IDLE_MOVEMENT);
 
   const gameMode = useGameStore((state) => state.gameMode);
+  const gameState = useGameStore((state) => state.gameState);
   const triggerInteract = useGameStore((state) => state.triggerInteract);
   const setPaused = useGameStore((state) => state.setPaused);
   const isPaused = useGameStore((state) => state.isPaused);
@@ -26,10 +27,11 @@ export function usePlayerControls() {
   const activePanel = useGameStore((state) => state.activePanel);
   const closeModal = useGameStore((state) => state.closeModal);
   const closePanel = useGameStore((state) => state.closePanel);
+  const respawnPlayer = useGameStore((state) => state.respawnPlayer);
 
   useEffect(() => {
-    // Disable game controls while intro overlay, classic view, or modals are active
-    if (gameMode !== 'playing') {
+    // Disable game controls while intro overlay, loading, classic view, or modals are active
+    if (gameState !== 'playing' && gameMode !== 'playing') {
       setMovement(IDLE_MOVEMENT);
       return undefined;
     }
@@ -80,6 +82,9 @@ export function usePlayerControls() {
         case 'KeyE':
           triggerInteract();
           break;
+        case 'KeyR':
+          respawnPlayer();
+          break;
         default:
           break;
       }
@@ -128,7 +133,7 @@ export function usePlayerControls() {
       window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('blur', handleBlur);
     };
-  }, [gameMode, triggerInteract, setPaused, isPaused, activeModal, activePanel, closeModal, closePanel]);
+  }, [gameState, gameMode, triggerInteract, respawnPlayer, setPaused, isPaused, activeModal, activePanel, closeModal, closePanel]);
 
   return movement;
 }

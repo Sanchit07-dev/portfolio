@@ -8,9 +8,10 @@ import React from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { DEVELOPER_PROFILE } from '../../data/gameData';
 import { MiniMap } from './MiniMap';
-import { Volume2, VolumeX, Menu, BookOpen, Backpack, Sparkles, HelpCircle, Compass, Scroll } from 'lucide-react';
+import { Volume2, VolumeX, Menu, BookOpen, Backpack, Sparkles, HelpCircle, Compass, Scroll, RotateCcw } from 'lucide-react';
 
 export function HUD() {
+  const gameState = useGameStore((state) => state.gameState);
   const gameMode = useGameStore((state) => state.gameMode);
   const nearbyInteractable = useGameStore((state) => state.nearbyInteractable);
   const activeQuestId = useGameStore((state) => state.activeQuestId);
@@ -22,8 +23,10 @@ export function HUD() {
   const openModal = useGameStore((state) => state.openModal);
   const setPaused = useGameStore((state) => state.setPaused);
   const switchToClassic = useGameStore((state) => state.switchToClassic);
+  const respawnPlayer = useGameStore((state) => state.respawnPlayer);
 
-  if (gameMode !== 'playing') return null;
+  // Render HUD only during active gameplay states (not during loading or intro menu)
+  if (gameState === 'loading' || gameState === 'menu' || (gameMode !== 'playing' && gameState !== 'playing')) return null;
 
   const activeQuest = quests.find((q) => q.id === activeQuestId);
   const completedCount = quests.filter((q) => q.completed).length;
@@ -89,6 +92,15 @@ export function HUD() {
               title={isMuted ? "Unmute Audio" : "Mute Audio"}
             >
               {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+            </button>
+
+            {/* Stuck / Respawn Button */}
+            <button
+              onClick={() => respawnPlayer()}
+              className="w-8 h-8 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 border border-neutral-700 flex items-center justify-center text-amber-300 shadow-sm transition-all"
+              title="I'm Stuck (Respawn - R)"
+            >
+              <RotateCcw size={15} />
             </button>
 
             {/* Inventory Slot */}
@@ -187,6 +199,10 @@ export function HUD() {
             <div className="flex items-center gap-1.5">
               <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">E</kbd>
               <span>Interact / Talk</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">R</kbd>
+              <span>Stuck (Respawn)</span>
             </div>
             <div className="flex items-center gap-1.5">
               <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono font-bold text-amber-300">ESC</kbd>
