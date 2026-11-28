@@ -41,10 +41,17 @@ export function Player() {
   const setNearbyInteractable = useGameStore((state) => state.setNearbyInteractable);
   const collectItem = useGameStore((state) => state.collectItem);
   const collectibles = useGameStore((state) => state.collectibles);
+  const gameMode = useGameStore((state) => state.gameMode);
+  const isPaused = useGameStore((state) => state.isPaused);
   const activeModal = useGameStore((state) => state.activeModal);
+  const activePanel = useGameStore((state) => state.activePanel);
 
-  // Mouse drag camera orbit listener
+  // Mouse drag camera orbit listener (only active while playing)
   useEffect(() => {
+    if (gameMode !== 'playing' || isPaused || activeModal || activePanel) {
+      return undefined;
+    }
+
     let isMouseDown = false;
     let prevMouseX = 0;
     let prevMouseY = 0;
@@ -93,7 +100,7 @@ export function Player() {
       window.removeEventListener('mouseup', onMouseUp);
       window.removeEventListener('wheel', onWheel);
     };
-  }, []);
+  }, [gameMode, isPaused, activeModal, activePanel]);
 
   // Collision detection helper: checks if a point (x, z) collides with an obstacle
   const checkCollisionAt = (px, pz, radius = PLAYER_PHYSICS.colliderRadius) => {
@@ -123,8 +130,16 @@ export function Player() {
   };
 
   useFrame((state, delta) => {
-    // Movement paused only while modal dialog is open
-    if (activeModal) return;
+    // Keep camera positioned nicely behind player during intro, but pause gameplay & input
+    if (gameMode !== 'playing' || isPaused || activeModal || activePanel) {
+      const camDist = cameraAngles.current.distance;
+      const camX = pos.current.x + Math.sin(cameraAngles.current.theta) * Math.cos(cameraAngles.current.phi) * camDist;
+      const camY = pos.current.y + Math.sin(cameraAngles.current.phi) * camDist + 1.8;
+      const camZ = pos.current.z + Math.cos(cameraAngles.current.theta) * Math.cos(cameraAngles.current.phi) * camDist;
+      camera.position.lerp(new THREE.Vector3(camX, Math.max(1.2, camY), camZ), delta * 4);
+      camera.lookAt(pos.current.x, pos.current.y + 1.4, pos.current.z);
+      return;
+    }
 
     // Movement calculation
     const currentSpeed = controls.sprint ? PLAYER_PHYSICS.sprintSpeed : PLAYER_PHYSICS.walkSpeed;

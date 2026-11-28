@@ -6,8 +6,11 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 
 export function MobileControls() {
+  const gameMode = useGameStore((state) => state.gameMode);
   const triggerInteract = useGameStore((state) => state.triggerInteract);
   const nearbyInteractable = useGameStore((state) => state.nearbyInteractable);
+
+  if (gameMode !== 'playing') return null;
 
   const simulateKey = (code, isDown) => {
     const eventType = isDown ? 'keydown' : 'keyup';

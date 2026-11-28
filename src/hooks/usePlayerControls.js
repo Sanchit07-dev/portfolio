@@ -6,26 +6,51 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 
-export function usePlayerControls() {
-  const [movement, setMovement] = useState({
-    forward: false,
-    backward: false,
-    left: false,
-    right: false,
-    jump: false,
-    sprint: false,
-  });
+const IDLE_MOVEMENT = {
+  forward: false,
+  backward: false,
+  left: false,
+  right: false,
+  jump: false,
+  sprint: false,
+};
 
+export function usePlayerControls() {
+  const [movement, setMovement] = useState(IDLE_MOVEMENT);
+
+  const gameMode = useGameStore((state) => state.gameMode);
   const triggerInteract = useGameStore((state) => state.triggerInteract);
   const setPaused = useGameStore((state) => state.setPaused);
   const isPaused = useGameStore((state) => state.isPaused);
   const activeModal = useGameStore((state) => state.activeModal);
+  const activePanel = useGameStore((state) => state.activePanel);
   const closeModal = useGameStore((state) => state.closeModal);
+  const closePanel = useGameStore((state) => state.closePanel);
 
   useEffect(() => {
+    // Disable game controls while intro overlay, classic view, or modals are active
+    if (gameMode !== 'playing') {
+      setMovement(IDLE_MOVEMENT);
+      return undefined;
+    }
+
     const handleKeyDown = (e) => {
       // Don't capture keys if typing in an input or textarea
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+      if (e.code === 'Escape') {
+        if (activeModal) {
+          closeModal();
+        } else if (activePanel) {
+          closePanel();
+        } else {
+          setPaused(!isPaused);
+        }
+        return;
+      }
+
+      // Ignore movement/interaction keys while paused or modal/panel open
+      if (isPaused || activeModal || activePanel) return;
 
       switch (e.code) {
         case 'KeyW':
@@ -54,13 +79,6 @@ export function usePlayerControls() {
           break;
         case 'KeyE':
           triggerInteract();
-          break;
-        case 'Escape':
-          if (activeModal) {
-            closeModal();
-          } else {
-            setPaused(!isPaused);
-          }
           break;
         default:
           break;
@@ -97,14 +115,20 @@ export function usePlayerControls() {
       }
     };
 
+    const handleBlur = () => {
+      setMovement(IDLE_MOVEMENT);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleBlur);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
     };
-  }, [triggerInteract, setPaused, isPaused, activeModal, closeModal]);
+  }, [gameMode, triggerInteract, setPaused, isPaused, activeModal, activePanel, closeModal, closePanel]);
 
   return movement;
 }

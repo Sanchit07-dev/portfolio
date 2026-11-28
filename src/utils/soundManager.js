@@ -31,8 +31,15 @@ class SoundManager {
   }
 
   resume() {
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+    try {
+      if (this.ctx && this.ctx.state === 'suspended') {
+        const res = this.ctx.resume();
+        if (res && typeof res.catch === 'function') {
+          res.catch(() => {});
+        }
+      }
+    } catch {
+      // Ignore AudioContext resume errors
     }
   }
 
@@ -191,6 +198,18 @@ class SoundManager {
     });
     this.oscillators = [];
     this.isBgmPlaying = false;
+  }
+
+  startEngine() {
+    // No-op safe stub for vehicle mode compatibility
+  }
+
+  stopEngine() {
+    // No-op safe stub for vehicle mode compatibility
+  }
+
+  playHorn() {
+    this.playClick();
   }
 }
 

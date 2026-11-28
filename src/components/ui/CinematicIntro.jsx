@@ -18,8 +18,16 @@ export function CinematicIntro() {
 
   if (gameMode !== 'intro') return null;
 
+  const handleStartClick = () => {
+    startAdventure();
+  };
+
+  const handlePortfolioClick = () => {
+    switchToClassic();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-b from-neutral-950/80 via-neutral-900/70 to-neutral-950/90 backdrop-blur-md select-none">
+    <div className="fixed inset-0 z-50 pointer-events-auto flex items-center justify-center p-4 bg-gradient-to-b from-neutral-950/80 via-neutral-900/70 to-neutral-950/90 backdrop-blur-md select-none">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -60,16 +68,18 @@ export function CinematicIntro() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
           <button
-            onClick={startAdventure}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-accent transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+            type="button"
+            onClick={handleStartClick}
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-accent transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
           >
             <Play size={16} fill="white" />
             <span>START ADVENTURE</span>
           </button>
 
           <button
-            onClick={switchToClassic}
-            className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-neutral-200 hover:text-white border border-neutral-700 font-semibold text-sm transition-all flex items-center justify-center gap-2"
+            type="button"
+            onClick={handlePortfolioClick}
+            className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-neutral-200 hover:text-white border border-neutral-700 font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Eye size={16} />
             <span>VIEW PORTFOLIO</span>

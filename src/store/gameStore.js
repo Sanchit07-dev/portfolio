@@ -123,24 +123,47 @@ export const useGameStore = create((set, get) => ({
   setGameMode: (mode) => set({ gameMode: mode }),
   
   startAdventure: () => {
-    soundManager.init();
-    soundManager.startAmbientMusic();
-    soundManager.startEngine();
-    rememberView('3d');
-    set({ gameMode: 'playing', ambientStarted: true, activePanel: null, isPaused: false });
-    soundManager.playInteract();
+    set({
+      gameMode: 'playing',
+      ambientStarted: true,
+      activePanel: null,
+      activeModal: null,
+      isPaused: false,
+    });
+    try {
+      rememberView('3d');
+      soundManager.init();
+      soundManager.startAmbientMusic();
+      soundManager.startEngine();
+      soundManager.playInteract();
+    } catch {
+      // Audio/storage side effect must never block starting the game
+    }
   },
 
   enterWorldPreview: () => {
-    rememberView('3d');
     set({ gameMode: 'intro', activeModal: null, activePanel: null, isPaused: false });
+    try {
+      rememberView('3d');
+    } catch {
+      // ignore
+    }
   },
 
   switchToClassic: () => {
-    soundManager.stopAmbientMusic();
-    soundManager.stopEngine();
-    rememberView('classic');
-    set({ gameMode: 'classic', activeModal: null, activePanel: null, isPaused: false });
+    set({
+      gameMode: 'classic',
+      activeModal: null,
+      activePanel: null,
+      isPaused: false,
+    });
+    try {
+      rememberView('classic');
+      soundManager.stopAmbientMusic();
+      soundManager.stopEngine();
+    } catch {
+      // Audio/storage side effect must never block switching to Classic View
+    }
   },
 
   setPaused: (isPaused) => {

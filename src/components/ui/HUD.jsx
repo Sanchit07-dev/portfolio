@@ -11,6 +11,7 @@ import { MiniMap } from './MiniMap';
 import { Volume2, VolumeX, Menu, BookOpen, Backpack, Sparkles, HelpCircle, Compass, Scroll } from 'lucide-react';
 
 export function HUD() {
+  const gameMode = useGameStore((state) => state.gameMode);
   const nearbyInteractable = useGameStore((state) => state.nearbyInteractable);
   const activeQuestId = useGameStore((state) => state.activeQuestId);
   const quests = useGameStore((state) => state.quests);
@@ -21,6 +22,8 @@ export function HUD() {
   const openModal = useGameStore((state) => state.openModal);
   const setPaused = useGameStore((state) => state.setPaused);
   const switchToClassic = useGameStore((state) => state.switchToClassic);
+
+  if (gameMode !== 'playing') return null;
 
   const activeQuest = quests.find((q) => q.id === activeQuestId);
   const completedCount = quests.filter((q) => q.completed).length;
